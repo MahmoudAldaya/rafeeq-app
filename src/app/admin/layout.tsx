@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
@@ -16,6 +16,7 @@ import {
     Shield,
     Receipt,
     Users,
+    Bell,
 } from "lucide-react";
 
 const navItems = [
@@ -25,6 +26,7 @@ const navItems = [
     { href: "/admin/payments", label: "طرق الدفع", icon: CreditCard, permission: "manage_finance" },
     { href: "/admin/receipts", label: "إشعارات الدفع", icon: Receipt, permission: "manage_finance" },
     { href: "/admin/users", label: "فريق الإدارة", icon: Users, permission: "manage_admins" },
+    { href: "/admin/notifications", label: "الإشعارات", icon: Bell, permission: "dashboard" },
 ];
 
 const roleLabels = {
@@ -38,7 +40,34 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const router = useRouter();
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const { admin, loading } = useAdmin();
+
+    useEffect(() => {
+        if (!admin) return;
+        const supabase = getSupabase();
+
+        // Fetch initial unread count
+        const fetchUnread = async () => {
+            const { count } = await supabase
+                .from('notifications')
+                .select('*', { count: 'exact', head: true })
+                .eq('is_read', false);
+            if (count !== null) setUnreadCount(count);
+        };
+        fetchUnread();
+
+        // Listen for new notifications in real-time
+        const channel = supabase.channel('realtime_notifications')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'notifications' },
+                () => setUnreadCount(c => c + 1)
+            )
+            .subscribe();
+
+        return () => { supabase.removeChannel(channel); };
+    }, [admin]);
 
     const handleLogout = async () => {
         const supabase = getSupabase();
@@ -111,7 +140,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                     }`}
                             >
                                 <item.icon className="w-4 h-4 flex-shrink-0" />
-                                {item.label}
+                                <span className="flex-1 text-right">{item.label}</span>
+                                {item.href === "/admin/notifications" && unreadCount > 0 && (
+                                    <span className="bg-red-500 text-white min-w-[20px] h-5 rounded-full flex items-center justify-center text-[10px] font-bold px-1.5 shadow-sm">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}

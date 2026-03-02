@@ -157,6 +157,18 @@ function OrderContent() {
         if (insertError) {
             setError("حدث خطأ أثناء الإرسال، يرجى المحاولة مجدداً");
         } else {
+            // Fire off a background notification to admins
+            fetch("/api/notifications", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: "طلب خدمة جديد 🎉",
+                    message: `قام/ت ${form.name} للتو بطلب "${service.title}" بقيمة ${form.amount}₪.`,
+                    type: "service_request",
+                    link: "/admin"
+                })
+            }).catch(console.error);
+
             setStep("success");
         }
     };

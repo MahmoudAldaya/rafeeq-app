@@ -90,8 +90,10 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            <div className="section-divider" />
+
             {/* Values */}
-            <section className="section py-16">
+            <section className="section pt-12 pb-16">
                 <div className="text-center mb-12">
                     <h2 className="section-title">
                         قيمنا <span className="gradient-text">الأساسية</span>
@@ -114,6 +116,8 @@ export default function AboutPage() {
                     ))}
                 </div>
             </section>
+
+            <div className="section-divider" />
 
             {/* Why Rafeeq */}
             <section className="section py-16 pb-24">
