@@ -36,11 +36,11 @@ export async function dispatchAdminNotification(payload: NotificationPayload) {
 
     if (telegramToken && telegramChatId) {
         try {
-            // Include a clean, markdown-formatted message
+            console.log(`[Telegram] Dispatching to Chat ID: ${telegramChatId}`);
             let text = `🔔 *${payload.title}*\n\n${payload.message}`;
             if (payload.order_id) text += `\n\n\`ID: ${payload.order_id}\``;
 
-            fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+            const res = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -48,10 +48,14 @@ export async function dispatchAdminNotification(payload: NotificationPayload) {
                     text: text,
                     parse_mode: 'Markdown'
                 })
-            }).catch(console.error); // Fire and forget so we don't slow down the request
+            });
+            const data = await res.json();
+            console.log(`[Telegram] Response:`, data);
         } catch (err) {
-            console.error("Failed to prepare Telegram notification:", err);
+            console.error("[Telegram] Fatal Notification Error:", err);
         }
+    } else {
+        console.warn("[Telegram] Skipped: Missing Credentials");
     }
 
     // --- PHASE 3: EMAIL INTEGRATION ---
@@ -60,7 +64,8 @@ export async function dispatchAdminNotification(payload: NotificationPayload) {
 
     if (resendApiKey && adminEmail) {
         try {
-            fetch('https://api.resend.com/emails', {
+            console.log(`[Resend] Dispatching email to: ${adminEmail}`);
+            const res = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${resendApiKey}`,
@@ -79,9 +84,13 @@ export async function dispatchAdminNotification(payload: NotificationPayload) {
                         </div>
                     `
                 })
-            }).catch(console.error); // Fire and forget
+            });
+            const data = await res.json();
+            console.log(`[Resend] Response:`, data);
         } catch (err) {
-            console.error("Failed to prepare Resend notification:", err);
+            console.error("[Resend] Fatal Notification Error:", err);
         }
+    } else {
+        console.warn("[Resend] Skipped: Missing Credentials");
     }
 }
