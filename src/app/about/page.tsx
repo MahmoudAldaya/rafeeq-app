@@ -62,7 +62,7 @@ export default function AboutPage() {
             </section>
 
             {/* Mission & Vision */}
-            <section className="section">
+            <section className="section py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="card p-8">
                         <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-6">
@@ -91,7 +91,7 @@ export default function AboutPage() {
             </section>
 
             {/* Values */}
-            <section className="section pt-0">
+            <section className="section py-16">
                 <div className="text-center mb-12">
                     <h2 className="section-title">
                         قيمنا <span className="gradient-text">الأساسية</span>
@@ -116,7 +116,7 @@ export default function AboutPage() {
             </section>
 
             {/* Why Rafeeq */}
-            <section className="section">
+            <section className="section py-16 pb-24">
                 <div className="card p-8 md:p-12">
                     <div className="text-center mb-12">
                         <h2 className="section-title">
