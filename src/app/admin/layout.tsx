@@ -17,6 +17,7 @@ import {
     Receipt,
     Users,
     Bell,
+    Settings,
 } from "lucide-react";
 
 const navItems = [
@@ -27,6 +28,7 @@ const navItems = [
     { href: "/admin/receipts", label: "إشعارات الدفع", icon: Receipt, permission: "manage_finance" },
     { href: "/admin/users", label: "فريق الإدارة", icon: Users, permission: "manage_admins" },
     { href: "/admin/notifications", label: "الإشعارات", icon: Bell, permission: "dashboard" },
+    { href: "/admin/settings", label: "إعدادات الموقع", icon: Settings, permission: "dashboard" },
 ];
 
 const roleLabels = {

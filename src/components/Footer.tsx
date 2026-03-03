@@ -13,8 +13,35 @@ import {
     Heart,
     ExternalLink,
 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getSupabase } from "@/lib/supabase";
 
 export default function Footer() {
+    const [socialLinks, setSocialLinks] = useState<{ icon: any, href: string, label: string }[]>([
+        { icon: Facebook, href: "#", label: "Facebook" },
+        { icon: Instagram, href: "#", label: "Instagram" },
+        { icon: Linkedin, href: "#", label: "LinkedIn" },
+        { icon: Send, href: "#", label: "Telegram" },
+    ]);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            const supabase = getSupabase();
+            const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+            if (data && !error) {
+                const links = [];
+                if (data.facebook_url) links.push({ icon: Facebook, href: data.facebook_url, label: "Facebook" });
+                if (data.instagram_url) links.push({ icon: Instagram, href: data.instagram_url, label: "Instagram" });
+                if (data.linkedin_url) links.push({ icon: Linkedin, href: data.linkedin_url, label: "LinkedIn" });
+                if (data.telegram_url) links.push({ icon: Send, href: data.telegram_url, label: "Telegram" });
+
+                if (links.length > 0) {
+                    setSocialLinks(links);
+                }
+            }
+        };
+        fetchSettings();
+    }, []);
     return (
         <footer className="relative bg-[#173955] border-t border-[#1e4768] pt-16 pb-8">
             {/* Glow */}
@@ -38,12 +65,7 @@ export default function Footer() {
                             نساعد طلاب غزة في الوصول إلى الفرص التعليمية حول العالم.
                         </p>
                         <div className="flex gap-3">
-                            {[
-                                { icon: Facebook, href: "#", label: "Facebook" },
-                                { icon: Instagram, href: "#", label: "Instagram" },
-                                { icon: Linkedin, href: "#", label: "LinkedIn" },
-                                { icon: Send, href: "#", label: "Telegram" },
-                            ].map((social) => (
+                            {socialLinks.map((social) => (
                                 <a
                                     key={social.label}
                                     href={social.href}
