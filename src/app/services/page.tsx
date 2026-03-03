@@ -129,7 +129,7 @@ export default function ServicesPage() {
             </section>
 
             {/* Workflow */}
-            <section className="section">
+            <section className="section py-16">
                 <div className="text-center mb-12">
                     <h2 className="text-2xl font-bold text-foreground mb-2">كيف نعمل؟</h2>
                     <p className="text-foreground">
@@ -137,7 +137,7 @@ export default function ServicesPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {workflow.map((step, index) => (
                         <div key={index} className="relative">
                             <div className="card text-center">
@@ -160,8 +160,10 @@ export default function ServicesPage() {
                 </div>
             </section>
 
+            <div className="section-divider" />
+
             {/* Services */}
-            <section className="section pt-0">
+            <section className="section py-16">
                 <div className="space-y-8">
                     {services.map((service, index) => (
                         <div
@@ -224,9 +226,11 @@ export default function ServicesPage() {
                 </div>
             </section>
 
+            <div className="section-divider" />
+
             {/* Payment info */}
-            <section className="section">
-                <div className="card p-8 text-center">
+            <section className="section py-16">
+                <div className="card p-8 text-center max-w-4xl mx-auto">
                     <h3 className="text-foreground font-bold text-xl mb-4">طرق الدفع</h3>
                     <p className="text-foreground mb-6 max-w-2xl mx-auto">
                         نوفر طرق دفع متعددة لتناسب احتياجاتك. يمكنك الدفع عبر PalPay أو

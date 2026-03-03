@@ -5,9 +5,30 @@ import { Mail, Phone, MapPin, Send, MessageCircle, Clock, Check } from "lucide-r
 
 export default function ContactPage() {
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
 
-    const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (!res.ok) throw new Error('فشل الإرسال');
+            setSubmitted(true);
+        } catch (err) {
+            setError('حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="min-h-screen pt-24 bg-background">
@@ -50,7 +71,12 @@ export default function ContactPage() {
                                     </div>
                                     <div className="mb-4"><label className="text-sm text-foreground font-medium mb-1 block">الموضوع</label><select value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} className="input" required><option value="">اختر الموضوع</option><option value="scholarship">استفسار عن منحة</option><option value="service">طلب خدمة</option><option value="payment">استفسار عن الدفع</option><option value="technical">مشكلة تقنية</option><option value="other">أخرى</option></select></div>
                                     <div className="mb-6"><label className="text-sm text-foreground font-medium mb-1 block">الرسالة</label><textarea required rows={6} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} placeholder="اكتب رسالتك هنا..." className="input resize-none" /></div>
-                                    <button type="submit" className="btn-primary w-full justify-center"><Send className="w-4 h-4" />إرسال الرسالة</button>
+
+                                    {error && <div className="p-3 mb-4 text-sm text-danger bg-danger/10 border border-danger/20 rounded-xl">{error}</div>}
+
+                                    <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+                                        {loading ? "جاري الإرسال..." : <><Send className="w-4 h-4" />إرسال الرسالة</>}
+                                    </button>
                                 </form>
                             )}
                         </div>
