@@ -7,7 +7,7 @@ import { getSupabase } from "@/lib/supabase";
 import {
     FileText, Languages, MessageSquare, Bot,
     Check, ChevronLeft, Upload, CreditCard,
-    Building, Banknote, Loader2, CheckCircle2, X, ArrowLeft
+    Building, Banknote, Wallet, Loader2, CheckCircle2, X, ArrowLeft
 } from "lucide-react";
 
 // Static service definitions (matches services page)
@@ -78,7 +78,7 @@ const serviceList = [
 
 interface PaymentAccount {
     id: string;
-    type: "palpay" | "bank";
+    type: "palpay" | "bank" | "usdt";
     label: string;
     account_number: string;
     holder_name: string;
@@ -312,8 +312,8 @@ function OrderContent() {
                                             className={`w-full text-right p-4 rounded-2xl border-2 transition-all ${selectedMethod?.id === acc.id ? "border-primary bg-primary/5" : "border-[rgba(24,28,32,0.1)] hover:border-primary/50"}`}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${acc.type === "palpay" ? "bg-blue-100" : "bg-green-100"}`}>
-                                                    {acc.type === "palpay" ? <CreditCard className="w-5 h-5 text-blue-600" /> : <Building className="w-5 h-5 text-green-600" />}
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${acc.type === "palpay" ? "bg-blue-100" : acc.type === "usdt" ? "bg-amber-100" : "bg-green-100"}`}>
+                                                    {acc.type === "palpay" ? <CreditCard className="w-5 h-5 text-blue-600" /> : acc.type === "usdt" ? <Wallet className="w-5 h-5 text-amber-600" /> : <Building className="w-5 h-5 text-green-600" />}
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="font-bold text-foreground text-sm">{acc.label}</p>
@@ -330,7 +330,7 @@ function OrderContent() {
                             ) : (
                                 <div className="bg-background rounded-2xl p-5 mb-6 text-center">
                                     <Banknote className="w-8 h-8 text-primary mx-auto mb-2" />
-                                    <p className="text-foreground text-sm font-medium">PalPay / تحويل بنكي عبر بنك فلسطين</p>
+                                    <p className="text-foreground text-sm font-medium">PalPay / بنك فلسطين / USDT</p>
                                     <p className="text-foreground text-xs mt-1">سيتم إرسال تفاصيل حساب الدفع عبر البريد الإلكتروني بعد تأكيد الطلب</p>
                                 </div>
                             )}
@@ -339,8 +339,8 @@ function OrderContent() {
                                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
                                     <p className="text-amber-800 text-sm font-medium">📋 خطوات الدفع:</p>
                                     <ol className="text-amber-700 text-sm mt-2 space-y-1 list-decimal list-inside">
-                                        <li>افتح تطبيق {selectedMethod.type === "palpay" ? "PalPay" : "تطبيق بنك فلسطين"}</li>
-                                        <li>أرسل {form.amount}₪ إلى رقم: <span dir="ltr" className="font-mono font-bold">{selectedMethod.account_number}</span></li>
+                                        <li>افتح {selectedMethod.type === "palpay" ? "تطبيق PalPay" : selectedMethod.type === "usdt" ? "محفظتك الرقمية (USDT TRC20)" : "تطبيق بنك فلسطين"}</li>
+                                        <li>أرسل المبلغ المطلوب إلى: <span dir="ltr" className="font-mono font-bold">{selectedMethod.account_number}</span></li>
                                         {selectedMethod.holder_name && <li>اسم المستفيد: {selectedMethod.holder_name}</li>}
                                         <li>احفظ صورة إشعار الدفع</li>
                                     </ol>

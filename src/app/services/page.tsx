@@ -233,11 +233,11 @@ export default function ServicesPage() {
                 <div className="card p-8 text-center max-w-4xl mx-auto">
                     <h3 className="text-foreground font-bold text-xl mb-4">طرق الدفع</h3>
                     <p className="text-foreground mb-6 max-w-2xl mx-auto">
-                        نوفر طرق دفع متعددة لتناسب احتياجاتك. يمكنك الدفع عبر PalPay أو
-                        تحويل بنكي عبر بنك فلسطين.
+                        نوفر طرق دفع متعددة لتناسب احتياجاتك. يمكنك الدفع عبر PalPay،
+                        تحويل بنكي عبر بنك فلسطين، أو عبر عملة USDT.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
-                        {["PalPay", "بنك فلسطين"].map(
+                        {["PalPay", "بنك فلسطين", "USDT"].map(
                             (method, i) => (
                                 <span key={i} className="badge badge-success text-sm">
                                     <Check className="w-3 h-3 ml-1" />

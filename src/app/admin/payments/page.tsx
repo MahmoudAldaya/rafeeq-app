@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
-import { Plus, Pencil, Trash2, X, Check, ToggleLeft, ToggleRight, CreditCard, Users, Clock } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, ToggleLeft, ToggleRight, CreditCard, Users, Clock, Building, Wallet } from "lucide-react";
 
-interface PaymentAccount { id: string; type: string; label: string; account_number: string; holder_name: string; is_active: boolean; }
+interface PaymentAccount { id: string; type: "palpay" | "bank" | "usdt"; label: string; account_number: string; holder_name: string; is_active: boolean; }
 interface CashPartner { id: string; name: string; district: string; phone: string; is_active: boolean; }
 interface Verification { id: string; student_name: string; student_email: string; amount: number; method: string; status: string; submitted_at: string; }
 
@@ -122,8 +122,8 @@ export default function AdminPaymentsPage() {
                                     <div key={a.id} className="bg-white rounded-2xl border border-[rgba(24,28,32,0.1)] p-5 shadow-sm">
                                         <div className="flex items-start justify-between mb-3">
                                             <div>
-                                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${a.type === "palpay" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
-                                                    {a.type === "palpay" ? "PalPay" : "بنك"}
+                                                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${a.type === "palpay" ? "bg-green-100 text-green-700" : a.type === "usdt" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"}`}>
+                                                    {a.type === "palpay" ? "PalPay" : a.type === "usdt" ? "USDT" : "بنك"}
                                                 </span>
                                                 <h3 className="font-bold text-foreground mt-2">{a.label}</h3>
                                             </div>
@@ -206,8 +206,8 @@ export default function AdminPaymentsPage() {
                                                 <td className="px-4 py-3 text-[#5A5248] hidden lg:table-cell">{v.method}</td>
                                                 <td className="px-4 py-3 text-center">
                                                     <span className={`text-xs font-semibold px-2 py-1 rounded-full ${v.status === "approved" ? "bg-green-100 text-green-700" :
-                                                            v.status === "rejected" ? "bg-red-100 text-red-700" :
-                                                                "bg-amber-100 text-amber-700"
+                                                        v.status === "rejected" ? "bg-red-100 text-red-700" :
+                                                            "bg-amber-100 text-amber-700"
                                                         }`}>
                                                         {v.status === "approved" ? "مقبول" : v.status === "rejected" ? "مرفوض" : "قيد الانتظار"}
                                                     </span>
@@ -241,9 +241,10 @@ export default function AdminPaymentsPage() {
                         <div className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-foreground mb-1">النوع</label>
-                                <select value={accountForm.type || "palpay"} onChange={(e) => setAccountForm((f) => ({ ...f, type: e.target.value }))} className="input">
+                                <select value={accountForm.type || "palpay"} onChange={(e) => setAccountForm((f) => ({ ...f, type: e.target.value as any }))} className="input">
                                     <option value="palpay">PalPay</option>
                                     <option value="bank">بنك</option>
+                                    <option value="usdt">USDT كريبتو</option>
                                 </select>
                             </div>
                             {[{ l: "التسمية", k: "label" }, { l: "رقم الحساب", k: "account_number" }, { l: "اسم صاحب الحساب", k: "holder_name" }].map(({ l, k }) => (

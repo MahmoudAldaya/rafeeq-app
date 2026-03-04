@@ -2,10 +2,8 @@ import {
     Search,
     Bell,
     FileText,
-    Languages,
     Bot,
     Shield,
-    Wifi,
     Send,
 } from "lucide-react";
 
@@ -29,12 +27,6 @@ const features = [
             "صياغة البيانات الشخصية والسير الذاتية من قِبل خبراء متخصصين بالمنح الدولية",
     },
     {
-        icon: Languages,
-        title: "ثنائي اللغة",
-        description:
-            "واجهة عربية أولاً مع محتوى ثنائي اللغة لتسهيل الانتقال للبيئة الأكاديمية الدولية",
-    },
-    {
         icon: FileText,
         title: "ترجمة الوثائق",
         description:
@@ -44,13 +36,7 @@ const features = [
         icon: Shield,
         title: "دفع آمن ومرن",
         description:
-            "طرق دفع متعددة: PalPay، بنك فلسطين، أو نقداً عبر شركائنا المحليين",
-    },
-    {
-        icon: Wifi,
-        title: "تصميم لباندويث منخفض",
-        description:
-            "منصة محسّنة للعمل على اتصالات الإنترنت غير المستقرة مع إمكانيات PWA",
+            "طرق دفع متعددة: PalPay، بنك فلسطين، أو عبر عملة USDT",
     },
     {
         icon: Send,

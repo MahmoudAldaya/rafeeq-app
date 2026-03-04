@@ -66,7 +66,7 @@ export default function PricingSection() {
                     </h2>
                     <p className="section-subtitle mx-auto">
                         أسعارنا مصممة خصيصاً لتناسب القدرة الشرائية المحلية. ادفع بالشيكل
-                        عبر PalPay أو بنك فلسطين
+                        عبر PalPay، بنك فلسطين، أو عبر عملة USDT
                     </p>
                 </div>
 
