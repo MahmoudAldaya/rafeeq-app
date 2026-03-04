@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import BrandIcon from "@/components/BrandIcon";
-import { Search, LogOut, ArrowLeft, Edit2, Save, X, Lock } from "lucide-react";
+import { Search, LogOut, ArrowLeft, Edit2, Save, X, Lock, Camera, Loader2 } from "lucide-react";
 
 export default function ProfilePage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Edit state
     const [isEditing, setIsEditing] = useState(false);
     const [fullName, setFullName] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState("");
     const [message, setMessage] = useState({ text: "", type: "" });
 
     useEffect(() => {
@@ -29,6 +32,7 @@ export default function ProfilePage() {
             }
             setUser(session.user);
             setFullName(session.user.user_metadata?.full_name || "");
+            setAvatarUrl(session.user.user_metadata?.avatar_url || "");
             setLoading(false);
         });
     }, [router]);
@@ -37,6 +41,61 @@ export default function ProfilePage() {
         const supabase = getSupabase();
         await supabase.auth.signOut();
         router.push("/");
+    };
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        // Validate file type and size
+        if (!file.type.startsWith("image/")) {
+            setMessage({ text: "يرجى اختيار ملف صورة صالح (PNG, JPG, etc.)", type: "error" });
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            setMessage({ text: "حجم الصورة كبير جداً. الحد الأقصى هو 5 ميغابايت.", type: "error" });
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+        setMessage({ text: "", type: "" });
+
+        try {
+            const supabase = getSupabase();
+            const fileExt = file.name.split(".").pop();
+            const filePath = `${user.id}/avatar.${fileExt}`;
+
+            // Upload to Supabase Storage (bucket: avatars)
+            const { error: uploadError } = await supabase.storage
+                .from("avatars")
+                .upload(filePath, file, { upsert: true });
+
+            if (uploadError) throw uploadError;
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from("avatars")
+                .getPublicUrl(filePath);
+
+            // Add cache-busting param to force reload of image
+            const urlWithCache = `${publicUrl}?t=${Date.now()}`;
+
+            // Save URL to user metadata
+            const { error: updateError, data } = await supabase.auth.updateUser({
+                data: { avatar_url: urlWithCache }
+            });
+
+            if (updateError) throw updateError;
+
+            setAvatarUrl(urlWithCache);
+            setUser(data.user);
+            setMessage({ text: "تم تحديث الصورة الشخصية بنجاح!", type: "success" });
+        } catch (err: any) {
+            console.error("Avatar upload error:", err);
+            setMessage({ text: err.message || "فشل رفع الصورة. تأكد من إنشاء bucket باسم 'avatars' في Supabase Storage.", type: "error" });
+        } finally {
+            setIsUploadingAvatar(false);
+        }
     };
 
     const handleSave = async () => {
@@ -49,7 +108,6 @@ export default function ProfilePage() {
                 data: { full_name: fullName }
             };
 
-            // Only include password if the user actually typed something
             if (newPassword.trim().length >= 6) {
                 updates.password = newPassword.trim();
             } else if (newPassword.trim().length > 0 && newPassword.trim().length < 6) {
@@ -115,8 +173,50 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-3xl border border-[rgba(24,28,32,0.1)] p-8 shadow-sm mb-6">
                     <div className="flex flex-col md:flex-row items-start gap-8">
                         {/* Avatar */}
-                        <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-[#4d94cf] to-[#6aabdb] flex items-center justify-center shadow-lg flex-shrink-0">
-                            <span className="text-3xl font-bold text-white uppercase">{displayName.charAt(0)}</span>
+                        <div className="relative flex-shrink-0 group/avatar">
+                            <div
+                                className="w-24 h-24 rounded-3xl overflow-hidden cursor-pointer shadow-lg"
+                                onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
+                                title="انقر لتغيير الصورة الشخصية"
+                            >
+                                {avatarUrl ? (
+                                    <img
+                                        src={avatarUrl}
+                                        alt="صورة الملف الشخصي"
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gradient-to-br from-[#4d94cf] to-[#6aabdb] flex items-center justify-center">
+                                        <span className="text-3xl font-bold text-white uppercase">{displayName.charAt(0)}</span>
+                                    </div>
+                                )}
+                                {/* Overlay on hover */}
+                                <div className="absolute inset-0 rounded-3xl bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
+                                    {isUploadingAvatar
+                                        ? <Loader2 className="w-7 h-7 text-white animate-spin" />
+                                        : <Camera className="w-7 h-7 text-white" />
+                                    }
+                                </div>
+                            </div>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleAvatarChange}
+                            />
+                            {/* Camera badge */}
+                            <button
+                                onClick={() => !isUploadingAvatar && fileInputRef.current?.click()}
+                                disabled={isUploadingAvatar}
+                                className="absolute -bottom-2 -left-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md border-2 border-white hover:bg-primary/90 transition-colors"
+                                title="تغيير الصورة"
+                            >
+                                {isUploadingAvatar
+                                    ? <Loader2 className="w-4 h-4 text-white animate-spin" />
+                                    : <Camera className="w-4 h-4 text-white" />
+                                }
+                            </button>
                         </div>
 
                         {/* Info / Edit Form */}
@@ -175,6 +275,7 @@ export default function ProfilePage() {
                                         <p className="text-muted text-sm mb-1">البريد الإلكتروني</p>
                                         <p className="text-foreground" dir="ltr">{user?.email}</p>
                                     </div>
+                                    <p className="text-xs text-muted">انقر على الصورة الشخصية لتغييرها.</p>
                                 </div>
                             )}
                         </div>

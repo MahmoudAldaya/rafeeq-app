@@ -54,17 +54,17 @@ export default function SettingsPage() {
         try {
             const supabase = getSupabase();
 
-            // Upsert the data (id 1)
+            // Update the existing data (id 1)
             const { error } = await supabase
                 .from("site_settings")
-                .upsert({
-                    id: 1,
+                .update({
                     facebook_url: settings.facebook_url,
                     instagram_url: settings.instagram_url,
                     linkedin_url: settings.linkedin_url,
                     telegram_url: settings.telegram_url,
                     updated_at: new Date().toISOString()
-                });
+                })
+                .eq("id", 1);
 
             if (error) throw error;
 
@@ -97,8 +97,8 @@ export default function SettingsPage() {
 
             {message.text && (
                 <div className={`p-4 rounded-xl flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
                     }`}>
                     {message.type === 'success' ? <CheckCircle2 className="w-5 h-5 flex-shrink-0" /> : <AlertCircle className="w-5 h-5 flex-shrink-0" />}
                     <p className="text-sm font-medium">{message.text}</p>
